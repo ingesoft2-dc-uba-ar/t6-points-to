@@ -1,0 +1,4 @@
+pydatalog==0.17.4
+networkx==3.5
+matplotlib==3.10.7
+javalang==0.13.0
