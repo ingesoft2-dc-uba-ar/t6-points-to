@@ -1,6 +1,9 @@
 venv/
 .venv/
-*.facts
-**/__pycache__/
 .idea/
+.vscode/
+
+**/__pycache__/
+
 *.pyc
+*.facts
