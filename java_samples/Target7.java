@@ -1,5 +1,3 @@
-
-
 package inge2.dataflow.targets;
 
 public class Target7 {
