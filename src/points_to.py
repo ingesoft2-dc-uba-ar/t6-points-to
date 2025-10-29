@@ -57,7 +57,7 @@ class PointsToAnalyzer:
                 #   a = b;
 
         # guardo los facts en disco
-        self.write_facts_to_disk(filename, new_facts, assign_facts, load_facts, store_facts)
+        self.write_facts_to_disk(filename, new_facts, assign_facts, store_facts, load_facts)
 
         return new_facts, assign_facts, store_facts, load_facts
 
