@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Entrega",
+      "setup": "",
+      "run": "python -m unittest discover -s test -p \"test*.py\"",
+      "input": "",
+      "output": "",
+      "comparison": "exact",
+      "timeout": 2,
+      "points": null
+    }
+  ]
+}
