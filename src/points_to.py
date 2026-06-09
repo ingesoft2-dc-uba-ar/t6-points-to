@@ -4,16 +4,14 @@ import glob
 import javalang
 import networkx as nx
 import matplotlib.pyplot as plt
-from pyDatalog import pyDatalog
+from src.prolog import PrologRunner, PrologError
 
 
 FOLDER_FACTS = "facts"
 FOLDER_JAVA_SAMPLES = "java_samples"
 FOLDER_IMAGES = "images"
 
-
-# los terms de pyDatalog solo se pueden definir a nivel de modulo :-/
-pyDatalog.create_terms('PointsTo, New, Assign, Store, Load, HeapField, X, Y, F, O1, O2') # COMPLETAR
+RULES_FILE = os.path.join(os.path.dirname(__file__), '..', 'prolog', 'points_to_rules.pl')
 
 
 class PointsToAnalyzer:
@@ -62,39 +60,31 @@ class PointsToAnalyzer:
         return new_facts, assign_facts, store_facts, load_facts
 
     def infer_from_facts(self, new_facts, assign_facts, store_facts, load_facts) -> tuple[list, list]:
-        # si no tengo facts agrego valores dummy (para evitar que el analisis de datalog falle)
-        assign_facts = assign_facts or [(None, None)]
-        new_facts = new_facts or [(None, None)]
-        load_facts = load_facts or [(None, None, None)]
-        store_facts = store_facts or [(None, None, None)]
+        # filtro los facts con valores None (si los hubiera)
+        new_facts = [(x, o) for x, o in new_facts if x and o]
+        assign_facts = [(x, y) for x, y in assign_facts if x and y]
+        store_facts = [(x, f, y) for x, f, y in store_facts if x and f and y]
+        load_facts = [(x, y, f) for x, y, f in load_facts if x and y and f]
 
-        # genero los facts en datalog
-        # (el orden no importa porque es flow-insensitive)
+        # imprimo los facts para debug
         for x, o in new_facts:
             print(f"new_fact={x} -> {o}")
-            +New(x, o)
-
         for x, y in assign_facts:
             print(f"assign={x} -> {y}")
-            +Assign(x, y)
-
         for x, y, f in load_facts:
             print(f"load={x} -> {y}.{f}")
-            +Load(x, y, f)
-
         for x, f, y in store_facts:
             print(f"store={x}.{f} -> {y}")
-            +Store(x, f, y)
 
         try:
-            points_to = [(str(a), str(b)) for (a, b) in PointsTo(X, Y).data if a and b]
-        except:
-            points_to = [] # por si falla la evaluacion de datalog
-
-        try:
-            heap_field = [(str(a), str(f), str(b)) for (a, f, b) in HeapField(X, F, Y).data if a and f and b]
-        except:
-            heap_field = [] # por si falla la evaluacion de datalog
+            runner = PrologRunner()
+            points_to, heap_field = runner.run(
+                new_facts, assign_facts, store_facts, load_facts,
+                rules_file=RULES_FILE,
+            )
+        except PrologError as e:
+            print(f"Error de Prolog: {e}")
+            points_to, heap_field = [], []
 
         return points_to, heap_field
 
@@ -181,12 +171,4 @@ class PointsToAnalyzer:
 if __name__ == '__main__':
     pta = PointsToAnalyzer()
     for filename in glob.glob(f"{FOLDER_JAVA_SAMPLES}/*.java"):
-        pyDatalog.clear() # limpio lo que pueda haber quedado de la iteracion anterior
-
-        # agrego las reglas de points-to
-        PointsTo(X, O1) <= New(X, O1)
-        HeapField(O1, F, O2) <= Store(X, F, Y) # INCOMPLETO!
-        # COMPLETAR
-
-        # corro el analisis
         pta.analyze(filename)

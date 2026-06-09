@@ -1,7 +1,7 @@
-import random
+import os
+import shutil
 import unittest
 
-from pyDatalog import pyDatalog
 from src.points_to import PointsToAnalyzer
 
 JAVA_SNIPPET = """
@@ -16,6 +16,9 @@ class T {
   }
 }
 """
+
+# Check if swipl is available
+_swipl_available = shutil.which("swipl") is not None
 
 
 class PointsToTester(unittest.TestCase):

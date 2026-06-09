@@ -1,26 +1,33 @@
-from pyDatalog import pyDatalog
+from src.prolog import PrologRunner
 
-pyDatalog.clear()
-pyDatalog.create_terms('Amigo, Conocido, X, Y, Z')
+runner = PrologRunner()
+output = runner.run_program(r"""
+:- table amigo/2.
+:- table conocido/2.
 
-# Facts
-+Amigo('alicia', 'beto')
-+Amigo('beto', 'camila')
-+Amigo('ximena', 'yamila')
-+Conocido('ximena', 'zoilo')
+% Facts
+amigo(alicia, beto).
+amigo(beto, camila).
+amigo(ximena, yamila).
+conocido(ximena, zoilo).
 
-# Reglas
+% Reglas
 
-# R1.a: si X es amigo de Y => X es conocido de Y
-Conocido(X, Y) <= Amigo(X, Y) 
+% R1: si X es amigo de Y => X es conocido de Y
+conocido(X, Y) :- amigo(X, Y).
 
-# R2: la relacion Amigo() es simetrica (podriamos hacer que no lo sea)
-Amigo(X, Y) <= Amigo(Y, X)
+% R2: la relacion amigo es simetrica (podriamos hacer que no lo sea)
+amigo(X, Y) :- amigo(Y, X).
 
-# R3: si X es amigo de Z y Z es conocido de Y => X es conocido de Y. Pero alguien no es conocido de si mismo
-Conocido(X, Y) <= Amigo(X, Z) & Conocido(Z, Y) & (X != Y)
+% R3: si X es amigo de Z y Z es conocido de Y => X es conocido de Y. Pero alguien no es conocido de si mismo
+conocido(X, Y) :- amigo(X, Z), conocido(Z, Y), X \= Y.
 
-# R4: si X es conocido de Z y Z es conocido de Y => X es conocido de Y. Pero alguien  no es conocido de si mismo
-Conocido(X, Y) <= Conocido(X, Z) & Conocido(Z, Y) & (X != Y)
+% R4: si X es conocido de Z y Z es conocido de Y => X es conocido de Y. Pero alguien no es conocido de si mismo
+conocido(X, Y) :- conocido(X, Z), conocido(Z, Y), X \= Y.
 
-print(Conocido(X, Y))
+:- forall(conocido(X, Y),
+    format('~w es conocido de ~w~n', [X, Y])).
+:- halt.
+""")
+
+print(output)

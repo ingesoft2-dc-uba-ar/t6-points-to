@@ -1,14 +1,21 @@
-from pyDatalog import pyDatalog
+from src.prolog import PrologRunner
 
-pyDatalog.create_terms('Abuelo, Padre, X, Y, Z') # para indicar que son terminos de nuestros predicados/reglas
+runner = PrologRunner()
+output = runner.run_program(r"""
+:- table abuelo/2.
 
-Abuelo(X, Z) <= Padre(X, Y) & Padre(Y, Z)
+padre('Carlos', 'Juan').
+padre('Juan', 'Esteban').
 
-+Padre("Carlos", "Juan")
-+Padre("Juan", "Esteban")
+abuelo(X, Z) :- padre(X, Y), padre(Y, Z).
 
-for a, b in Abuelo(X, Z).data:
-    print(f"{a} es abuelo de {b}")
+:- forall(abuelo(X, Z),
+    format('~w es abuelo de ~w~n', [X, Z])).
 
-# no llamo a clear() -> siguen valiendo las reglas y hechos anteriores
+% Agregar mas hechos y definir las relaciones bisabuelo, familiar y antepasado.
+% COMPLETAR
 
+:- halt.
+""")
+
+print(output)
