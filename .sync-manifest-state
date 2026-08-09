@@ -1,0 +1,17 @@
+requirements.txt
+run_tests.sh
+__init__.py
+src/conocido.py
+src/dump_tree.py
+src/prolog.py
+test/__init__.py
+java_samples/Target1.java
+java_samples/Target2.java
+java_samples/Target3.java
+java_samples/Target4.java
+java_samples/Target5.java
+java_samples/Target6.java
+java_samples/Target7.java
+java_samples/Target8.java
+facts/README.md
+images/README.md
