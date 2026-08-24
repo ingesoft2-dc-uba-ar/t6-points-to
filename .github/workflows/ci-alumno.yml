@@ -1,0 +1,18 @@
+name: CI del alumno
+
+# Corre el test suite público del esqueleto en cada push, para que el
+# alumno vea el resultado de sus propios tests en su repo/fork. Este
+# archivo se sincroniza al repo público vía sync-manifest.txt (ver
+# ingesoft2-dc-uba-ar/catedra-tooling).
+
+on: [push]
+
+jobs:
+  test:
+    uses: ingesoft2-dc-uba-ar/catedra-tooling/.github/workflows/esqueleto-ci.yml@main
+    with:
+      stack: python
+      python_version: "3.11"
+      apt_packages: "swi-prolog"
+      pre_test_command: "pip install -r requirements.txt"
+      test_command: "PYTHONHASHSEED=0 python -m unittest discover -s test -t . -p 'test*.py'"
