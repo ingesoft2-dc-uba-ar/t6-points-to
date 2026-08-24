@@ -4,15 +4,31 @@ name: CI del alumno
 # alumno vea el resultado de sus propios tests en su repo/fork. Este
 # archivo se sincroniza al repo público vía sync-manifest.txt (ver
 # ingesoft2-dc-uba-ar/catedra-tooling).
+#
+# Los pasos están inline (no via workflow_call a catedra-tooling) porque
+# GitHub no permite que un repo público invoque un reusable workflow
+# alojado en un repo privado, sin importar el "Access" a nivel org.
 
 on: [push]
 
 jobs:
   test:
-    uses: ingesoft2-dc-uba-ar/catedra-tooling/.github/workflows/esqueleto-ci.yml@main
-    with:
-      stack: python
-      python_version: "3.11"
-      apt_packages: "swi-prolog"
-      pre_test_command: "pip install -r requirements.txt"
-      test_command: "PYTHONHASHSEED=0 python -m unittest discover -s test -t . -p 'test*.py'"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar paquetes apt extra
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends swi-prolog
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Correr test suite público
+        run: PYTHONHASHSEED=0 python -m unittest discover -s test -t . -p 'test*.py'
